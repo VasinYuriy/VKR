@@ -23,10 +23,15 @@ class FillTemplate:
 
     def fill_words(self):
         qualification_dict = {
-            'Бакалавриат': 'бакалавра',
-            'Специалитет': 'специалиста',
-            'Магистратура': 'магистра',
-            'Аспирантура': 'аспиранта'}
+            'Бакалавр': 'бакалавра',
+            'Экономист': 'специалиста',
+            'Магистр': 'магистра',
+            'Аспирант': 'аспиранта'}
+        years_dict = {
+            'Бакалавр': '4 года',
+            'Экономист': '5 лет',
+            'Магистр': '2 года',
+            'Аспирант': '3 года'}
         try:
             os.mkdir(self.out_path)
         except Exception as e:
@@ -49,6 +54,7 @@ class FillTemplate:
             context['document'] = student.document
             context['certificateYear'] = student.certificateYear
             context['student_number'] = student.studentNumber
+            context['studing_years'] = years_dict[self.group.qualification]
 
             if student.formCheck:
                 context['info{}'.format(j)] = 'Форма обучения: {}'.format(self.group.form.lower())
@@ -66,11 +72,15 @@ class FillTemplate:
                 context['info{}'.format(j)] = 'Часть образовательной программы в объеме з.е. освоена в'
 
             for i, exam in enumerate(student.first_page_exams):
+                if exam[0] == 'Иностранный язык':
+                    exam[0] = 'Иностранный язык' + ' ({})'.format(student.language)
                 context['exam{}'.format(i)] = exam[0]
                 context['exam{}_unit'.format(i)] = exam[1]
                 context['exam{}_mark'.format(i)] = exam[2]
 
             for i, exam in enumerate(student.second_page_exams):
+                if exam[0] == 'Иностранный язык':
+                    exam[0] = 'Иностранный язык' + ' ({})'.format(student.language)
                 context['exam_new{}'.format(i)] = exam[0]
                 context['exam_new{}_unit'.format(i)] = exam[1]
                 context['exam_new{}_mark'.format(i)] = exam[2]

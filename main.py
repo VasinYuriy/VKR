@@ -11,6 +11,8 @@ from UI.examCheckWidget import Ui_examCheck
 from UI.global_info import Ui_Global_info
 from UI.examPairWindow import Ui_examPairs
 from UI.examPairWidget import Ui_examPair
+from UI.languageChoice import Ui_languageChoice
+from UI.languageChoiceWidget import Ui_languageChoiceWidget
 from math import ceil
 from word.word import FillTemplate
 
@@ -22,7 +24,6 @@ class Window1(QWidget, Ui_loadSyllabusWindow):
         self.pushButton.clicked.connect(self.choose_file)
         self.syllabus_path = self.path_label.text()
         self.exam_units = None
-        self.diffs = None
         self.global_units = None
         self.nextButton.clicked.connect(self.read_file)
         self.nextButton.clicked.connect(self.hide)
@@ -34,7 +35,7 @@ class Window1(QWidget, Ui_loadSyllabusWindow):
 
     def read_file(self):
         reader = SyllabusReader(self.syllabus_path)
-        self.exam_units, self.diffs, self.global_units = reader.read_syllabus()
+        self.exam_units, self.global_units = reader.read_syllabus()
 
 
 class Window2(QWidget, Ui_loadSyllabusWindow):
@@ -51,7 +52,7 @@ class Window2(QWidget, Ui_loadSyllabusWindow):
     def choose_file(self):
         file_name = QFileDialog.getOpenFileNames(self, 'Выберите файл...', '', 'Excel file (*.xlsx)')
         self.group_path = file_name[0]
-        path_name = '                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            '.join(self.group_path)
+        path_name = '\n'.join(self.group_path)
         self.path_label.setText(path_name)
 
     def read_file(self):
@@ -151,12 +152,42 @@ class Window4(QWidget, Ui_checkForm):
                 'Дата рождения': date_converter(widget.birthDate.date().toString("dd MM yyyy").split(' ')),
                 'Документ': widget.document.currentText(),
                 'Дата выдачи аттестата': widget.certificateYear.text(),
-                'Регистрационный номер': widget.studentNumber.text()
+                'Регистрационный номер': widget.studentNumber.text(),
+                'Стартап': widget.startupCheck.isChecked()
 
             }
             students_dict[name] = student_dict
             # print(student_dict['Дата рождения'])
         self.students_info = students_dict
+
+
+class LanguageChoiceWidget(QWidget, Ui_languageChoiceWidget):
+    def __init__(self, student):
+        super().__init__()
+        self.setupUi(self)
+        self.studentName.setText(student)
+
+
+class Window5(QWidget, Ui_languageChoice):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setWindowTitle('Выбор языка')
+        self.pushButton.clicked.connect(self.hide)
+        self.widgets = []
+
+    def set_widgets(self, students):
+        for student in students:
+            self.widgets.append(LanguageChoiceWidget(student))
+            self.widgetsLayout.addWidget(self.widgets[-1])
+
+    def get_languages(self):
+        languages = {}
+        diploma_languages = {}
+        for widget in self.widgets:
+            languages[widget.studentName.text()] = widget.languageChoice.currentText()
+            diploma_languages[widget.studentName.text()] = widget.languageChoiceDiploma.currentText()
+        return languages, diploma_languages
 
 
 class ExamCheckWidget(QWidget, Ui_examCheck):
@@ -166,7 +197,7 @@ class ExamCheckWidget(QWidget, Ui_examCheck):
         self.examName.setText(exam)
 
 
-class Window5(QWidget, Ui_examCheckWindow):
+class Window6(QWidget, Ui_examCheckWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -186,7 +217,7 @@ class Window5(QWidget, Ui_examCheckWindow):
         self.neededExams = exam_list
 
 
-class Window6(QWidget, Ui_Global_info):
+class Window7(QWidget, Ui_Global_info):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -219,6 +250,7 @@ class MainWindow(QMainWindow):
         self.w4 = Window4()
         self.w5 = Window5()
         self.w6 = Window6()
+        self.w7 = Window7()
         self.w1.nextButton.clicked.connect(self.w2.show)
         self.w2.nextButton.clicked.connect(self.w3.show)
         self.w2.nextButton.clicked.connect(self.setup_w3)
@@ -227,16 +259,21 @@ class MainWindow(QMainWindow):
         self.w4.nextButton.clicked.connect(self.w5.show)
         self.w4.nextButton.clicked.connect(self.add_exams)
         self.w4.nextButton.clicked.connect(self.setup_w5)
-        self.w5.nextButton.clicked.connect(self.w6.show)
-        self.w6.nextButton.clicked.connect(self.w6_next_button_funcs)
+        self.w5.pushButton.clicked.connect(self.setup_w6)
+        self.w5.pushButton.clicked.connect(self.w6.show)
+        self.w6.nextButton.clicked.connect(self.w7.show)
+        self.w7.nextButton.clicked.connect(self.w7_next_button_funcs)
 
     def make_group(self):
-        group = self.Group(self.w4.students_info, self.w1.exam_units, self.w6.global_data, self.w2.group_info, self.w5.neededExams, self.w1.global_units, self.w1.diffs)
+        languages, diploma_languages = self.w5.get_languages()
+        group = self.Group(self.w4.students_info, self.w1.exam_units, self.w7.global_data, self.w2.group_info, self.w6.neededExams, self.w1.global_units, languages, diploma_languages)
         return group
 
     class Group:
-        def __init__(self, students_info, exam_units, global_data, group_info, needed_exams, global_units, diffs):
+        def __init__(self, students_info, exam_units, global_data, group_info, needed_exams, global_units, languages, diploma_languages):
             self.students = []
+            self.languages = languages
+            self.diploma_languages = diploma_languages
             self.exam_units = exam_units
             self.protocol = global_data['protocol']
             self.diplomaDate = global_data['diplomaDate']
@@ -259,23 +296,24 @@ class MainWindow(QMainWindow):
                 students_info=students_info,
                 needed_exams=needed_exams,
                 exam_units=exam_units,
-                diffs=diffs,
                 global_units=global_units,
                 excel_dict=excel_dict
             )
 
-        def set_students(self, group_marks, course_projects, course_works, students_info, needed_exams, exam_units, diffs, global_units, excel_dict):
+        def set_students(self, group_marks, course_projects, course_works, students_info, needed_exams, exam_units, global_units, excel_dict):
             for student, exams in group_marks.items():
                 student_marks = {
                     k: v for k, v in exams.items() if (k.strip() in needed_exams) and (str(v) in [
                         '3', '4', '5', 'зачет', 'None', 'не явился', 'не допущен'])
                 }
-
+                print(student)
                 student_info = students_info[student]
-                self.students.append(self.Student(student, student_marks, course_projects[student], course_works[student], student_info, exam_units, diffs, global_units, excel_dict[student]))
+                language = self.languages[student]
+                diploma_language = self.diploma_languages[student]
+                self.students.append(self.Student(student, student_marks, course_projects[student], course_works[student], student_info, exam_units, global_units, excel_dict[student], self.qualification, language, diploma_language))
 
         class Student:
-            def __init__(self, name, student_marks, course_projects, course_works, student_info, exam_units, diffs, global_units, excel):
+            def __init__(self, name, student_marks, course_projects, course_works, student_info, exam_units, global_units, excel, qualification, language, diploma_language):
                 self.secondName = name.split(' ')[0]
                 self.firstName = name.split(' ')[1]
                 self.thirdName = ' '.join(name.split(' ')[2:])
@@ -288,13 +326,17 @@ class MainWindow(QMainWindow):
                 self.document = student_info['Документ']
                 self.certificateYear = student_info['Дата выдачи аттестата']
                 self.studentNumber = student_info['Регистрационный номер']
-                self.first_page_exams, self.second_page_exams = self.format_exams(exam_units, student_marks, course_projects, course_works, diffs, global_units)
+                self.qualification = qualification
+                self.language = language
+                self.diploma_language = diploma_language
+                self.startup = student_info['Стартап']
+                self.first_page_exams, self.second_page_exams = self.format_exams(exam_units, student_marks, course_projects, course_works, global_units)
                 self.excel = excel
 
             def __str__(self):
                 return self.secondName
 
-            def format_exams(self, exam_units, student_marks, course_projects, course_works, diffs, global_units):
+            def format_exams(self, exam_units, student_marks, course_projects, course_works, global_units):
                 first_page = []
                 second_page = []
                 row = 0
@@ -310,10 +352,7 @@ class MainWindow(QMainWindow):
                             current_list = second_page
                             list_flag = True
                         if student_marks[exam] in mark_dict.keys():
-                            if exam in diffs:
-                                mark = 'зачтено ({})'.format(mark_dict[student_marks[exam]])
-                            else:
-                                mark = mark_dict[student_marks[exam]]
+                            mark = mark_dict[student_marks[exam]]
                         else:
                             mark = 'x'
                         # print('{}: {}'.format(exam, row))
@@ -343,10 +382,7 @@ class MainWindow(QMainWindow):
                             list_flag = True
 
                         if student_marks[exam] in mark_dict.keys():
-                            if exam in diffs:
-                                mark = 'зачтено ({})'.format(mark_dict[student_marks[exam]])
-                            else:
-                                mark = mark_dict[student_marks[exam]]
+                            mark = mark_dict[student_marks[exam]]
                         else:
                             mark = 'x'
                         # print('{}: {}'.format(exam, row))
@@ -355,7 +391,11 @@ class MainWindow(QMainWindow):
                             unit = '{} з. е.'.format(unit)
                         current_list.append([exam, unit, mark])
 
-                row += 4
+                if self.startup:
+                    row += 6
+                else:
+                    row += 5
+
                 if row >= max_row and not list_flag:
                     row = 0
                     current_list = second_page
@@ -370,8 +410,30 @@ class MainWindow(QMainWindow):
                     'x'
                 ])
                 current_list.append(['в том числе:', '', ''])
-                current_list.append(['Государственный экзамен', '3 з. е.', ''])
-                current_list.append(['Выпускная квалификационная работа', '6 з. е.', ''])
+                current_list.append(['Государственный экзамен', 'x', ''])
+                switch = {
+                    'Бакалавр': ' (бакалаврская работа) «...» ',
+                    'Магистр': ' (магистерская диссертация) «...» ',
+                    'Экономист': ' (дипломная работа) «...» ',
+                    'Аспирант': ' (кандидатская диссертация) «...» '
+                          }
+                text_to_append = ''
+                if self.startup and self.diploma_language == 'русский':
+                    text_to_append = '(Защита в формате «Стартап как диплом»)'
+                elif self.startup and self.diploma_language != 'русский':
+                    formatted_language = {
+                        'английский': 'английском',
+                        'немецкий': 'немецком',
+                        'французский': 'французском'}[self.diploma_language]
+                    text_to_append = '(Защита в формате «Стартап как диплом» на иностранном ({}) языке)'.format(formatted_language)
+                elif not self.startup and self.diploma_language != 'русский':
+                    formatted_language = {
+                        'английский': 'английском',
+                        'немецкий': 'немецком',
+                        'французский': 'французском'}[self.diploma_language]
+                    text_to_append = '(Защита на иностранном ({}) языке)'.format(formatted_language)
+
+                current_list.append(['Выпускная квалификационная работа' + switch[self.qualification] + text_to_append, 'x', ''])
 
                 row += 5
                 if row >= max_row and not list_flag:
@@ -451,8 +513,8 @@ class MainWindow(QMainWindow):
 
                     current_list.append([
                         'Факультативные дисциплины',
-                        '{} з. е.'.format(unit_sum),
-                        'x'
+                        '',
+                        ''
                     ])
                     current_list.append(['в том числе:', '', ''])
 
@@ -464,10 +526,7 @@ class MainWindow(QMainWindow):
                                 current_list = second_page
                                 list_flag = True
                             if student_marks[exam] in mark_dict.keys():
-                                if exam in diffs:
-                                    mark = 'зачтено ({})'.format(mark_dict[student_marks[exam]])
-                                else:
-                                    mark = mark_dict[student_marks[exam]]
+                                mark = mark_dict[student_marks[exam]]
                             else:
                                 mark = 'x'
                             unit = exam_units['Факультативы'][exam]
@@ -497,14 +556,18 @@ class MainWindow(QMainWindow):
         self.w4.setup_students(self.w2.group_info['group_marks'].keys())
 
     def setup_w5(self):
+        self.w5.set_widgets(self.w2.group_info['group_marks'].keys())
+
+    def setup_w6(self):
+        self.w5.get_languages()
         for subject in self.w1.exam_units.values():
-            self.w5.setup_exams(subject)
+            self.w6.setup_exams(subject)
 
     def make_docs(self):
         filler = FillTemplate(template_path='word/template', group=self.make_group())
         filler.fill_words()
 
-    def w6_next_button_funcs(self):
+    def w7_next_button_funcs(self):
         self.make_docs()
         app.quit()
 

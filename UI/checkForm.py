@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'UI/checkForm.ui'
+# Form implementation generated from reading ui file 'checkForm.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_checkForm(object):
     def setupUi(self, checkForm):
         checkForm.setObjectName("checkForm")
-        checkForm.resize(1298, 564)
+        checkForm.resize(1402, 564)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(checkForm)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.groupBox_3 = QtWidgets.QGroupBox(checkForm)
@@ -25,6 +25,7 @@ class Ui_checkForm(object):
         self.groupBox_3.setSizePolicy(sizePolicy)
         self.groupBox_3.setMaximumSize(QtCore.QSize(16777215, 120))
         self.groupBox_3.setTitle("")
+        self.groupBox_3.setAlignment(QtCore.Qt.AlignCenter)
         self.groupBox_3.setObjectName("groupBox_3")
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout(self.groupBox_3)
         self.horizontalLayout_5.setContentsMargins(18, -1, 34, -1)
@@ -38,8 +39,8 @@ class Ui_checkForm(object):
         self.groupBox.setMaximumSize(QtCore.QSize(16777215, 100))
         self.groupBox.setTitle("")
         self.groupBox.setObjectName("groupBox")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.groupBox)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.groupBox)
+        self.horizontalLayout.setObjectName("horizontalLayout")
         self.label_6 = QtWidgets.QLabel(self.groupBox)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -51,9 +52,7 @@ class Ui_checkForm(object):
         self.label_6.setStyleSheet("margin-left:9px;")
         self.label_6.setWordWrap(True)
         self.label_6.setObjectName("label_6")
-        self.horizontalLayout_2.addWidget(self.label_6)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.addWidget(self.label_6)
         self.label = QtWidgets.QLabel(self.groupBox)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -162,7 +161,18 @@ class Ui_checkForm(object):
         self.label_9.setWordWrap(True)
         self.label_9.setObjectName("label_9")
         self.horizontalLayout.addWidget(self.label_9)
-        self.horizontalLayout_2.addLayout(self.horizontalLayout)
+        self.label_11 = QtWidgets.QLabel(self.groupBox)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_11.sizePolicy().hasHeightForWidth())
+        self.label_11.setSizePolicy(sizePolicy)
+        self.label_11.setMinimumSize(QtCore.QSize(100, 0))
+        self.label_11.setMaximumSize(QtCore.QSize(16777215, 100))
+        self.label_11.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_11.setWordWrap(True)
+        self.label_11.setObjectName("label_11")
+        self.horizontalLayout.addWidget(self.label_11)
         self.horizontalLayout_5.addWidget(self.groupBox)
         self.verticalLayout_3.addWidget(self.groupBox_3)
         self.scrollArea = QtWidgets.QScrollArea(checkForm)
@@ -174,7 +184,7 @@ class Ui_checkForm(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1278, 362))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1382, 362))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -217,4 +227,15 @@ class Ui_checkForm(object):
         self.label_10.setText(_translate("checkForm", "Документ"))
         self.label_8.setText(_translate("checkForm", "Год выдачи документа"))
         self.label_9.setText(_translate("checkForm", "Регистрационный номер"))
+        self.label_11.setText(_translate("checkForm", "Стартап"))
         self.nextButton.setText(_translate("checkForm", "Далее"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    checkForm = QtWidgets.QWidget()
+    ui = Ui_checkForm()
+    ui.setupUi(checkForm)
+    checkForm.show()
+    sys.exit(app.exec_())

@@ -11,7 +11,6 @@ class SyllabusReader:
                 return column
 
     def read_syllabus(self):
-        diffs = []
         discs = {}
         pracs = {}
         gias = {}
@@ -77,16 +76,11 @@ class SyllabusReader:
                 if 'У' in self.sheet.cell(column=2, row=row).value:
                     exam = 'Учебная практика ({})'.format(' '.join([word for word in exam.lower().split(' ') if word not in ['учебная', 'производственная']]))
                 elif 'П' in self.sheet.cell(column=2, row=row).value:
-                    if exam == 'Преддипломная практика':
-                        exam = 'Производственная практика (преддипломная)'
-                    else:
-                        exam = 'Производственная практика ({})'.format(' '.join([word for word in exam.lower().split(' ') if word not in ['учебная', 'производственная']]))
+                    exam = 'Производственная практика ({})'.format(' '.join([word for word in exam.lower().split(' ') if word not in ['учебная', 'производственная']]))
                 if unit:
                     current_dict[exam] = int(unit)
                 else:
                     current_dict[exam] = 'x'
-                if self.sheet.cell(column=6, row=row).value:
-                    diffs.append(exam)
 
             row += 1
             first_cell = self.sheet.cell(column=1, row=row).value
@@ -103,7 +97,7 @@ class SyllabusReader:
             'в том числе объем контактной работы обучающихся во взаимодействии с преподавателем в академических часах:'] = round(
             hour_sum)
 
-        return exam_units, diffs, global_units
+        return exam_units, global_units
 
 
 if __name__ == '__main__':
